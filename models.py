@@ -1,95 +1,92 @@
 # coding: utf-8
-from sqlalchemy import Column, ForeignKey, String, TIMESTAMP, Text, text
+from sqlalchemy import  ForeignKey, String, TIMESTAMP, Text, text
 from sqlalchemy.dialects.mysql import INTEGER
-from sqlalchemy.orm import relationship
-from sqlalchemy.ext.declarative import declarative_base
-
-Base = declarative_base()
-metadata = Base.metadata
+from exts import db
 
 
-class Schema(Base):
+
+class Schema(db.Model):
     __tablename__ = 'Schema'
 
-    id = Column(INTEGER(11), primary_key=True)
-    path = Column(String(200), nullable=False, unique=True)
+    id = db.Column(db.INTEGER(11), primary_key=True)
+    path = db.Column(db.String(200), nullable=False, unique=True)
 
 
-class Student(Base):
+class Student(db.Model):
     __tablename__ = 'Student'
 
-    id = Column(String(15), primary_key=True, unique=True)
-    password = Column(String(20), nullable=False)
-    session = Column(String(128), unique=True)
-    name = Column(String(16))
+    id = db.Column(db.String(15), primary_key=True, unique=True)
+    password = db.Column(db.String(20), nullable=False)
+    session = db.Column(db.String(128), unique=True)
+    name = db.Column(db.String(16))
 
 
-class Question(Base):
+class Question(db.Model):
     __tablename__ = 'Question'
 
-    id = Column(INTEGER(11), primary_key=True, unique=True)
-    idSchema = Column(ForeignKey('Schema.id', ondelete='CASCADE'), nullable=False, index=True)
-    title = Column(String(1000), nullable=False)
-    text = Column(String(5000), nullable=False)
-    score = Column(INTEGER(11), nullable=False, server_default=text("'5'"))
-    result = Column(String(10000), nullable=False)
+    id = db.Column(INTEGER(11), primary_key=True, unique=True)
+    idSchema = db.Column(db.ForeignKey('Schema.id', ondelete='CASCADE'), nullable=False, index=True)
+    title = db.Column(db.String(1000), nullable=False)
+    text = db.Column(db.String(5000), nullable=False)
+    score = db.Column(INTEGER(11), nullable=False, server_default=db.text("'5'"))
+    result = db.Column(String(10000), nullable=False)
 
-    Schema = relationship('Schema')
+    Schema = db.relationship('Schema')
 
 
-class Table(Base):
+class Table(db.Model):
     __tablename__ = 'Table'
 
-    id = Column(INTEGER(11), primary_key=True)
-    idSchema = Column(ForeignKey('Schema.id', ondelete='CASCADE'), nullable=False, index=True)
-    sql = Column(String(500), nullable=False)
+    id = db.Column(INTEGER(11), primary_key=True)
+    idSchema = db.Column(ForeignKey('Schema.id', ondelete='CASCADE'), nullable=False, index=True)
+    sql = db.Column(String(500), nullable=False)
 
-    Schema = relationship('Schema')
+    Schema = db.relationship('Schema')
 
 
-class Answer(Base):
+class Answer(db.Model):
     __tablename__ = 'Answer'
 
-    id = Column(INTEGER(11), primary_key=True)
-    idQuestion = Column(ForeignKey('Question.id', ondelete='CASCADE'), nullable=False, index=True)
-    data = Column(String(400), nullable=False)
-    json = Column(String(600))
+    id = db.Column(INTEGER(11), primary_key=True)
+    idQuestion = db.Column(ForeignKey('Question.id', ondelete='CASCADE'), nullable=False, index=True)
+    data = db.Column(String(400), nullable=False)
+    json = db.Column(String(600))
 
-    Question = relationship('Question')
+    Question = db.relationship('Question')
 
 
-class Insert(Base):
+class Insert(db.Model):
     __tablename__ = 'Insert'
 
-    id = Column(INTEGER(11), primary_key=True)
-    idTable = Column(ForeignKey('Table.id'), nullable=False, index=True)
-    sql = Column(String(500), nullable=False)
+    id = db.Column(INTEGER(11), primary_key=True)
+    idTable = db.Column(ForeignKey('Table.id'), nullable=False, index=True)
+    sql = db.Column(String(500), nullable=False)
 
-    Table = relationship('Table')
+    Table = db.relationship('Table')
 
 
-class Submit(Base):
+class Submit(db.Model):
     __tablename__ = 'Submit'
 
-    id = Column(INTEGER(11), primary_key=True)
-    idStudent = Column(ForeignKey('Student.id'), nullable=False, index=True)
-    idQuestion = Column(ForeignKey('Question.id', ondelete='CASCADE'), nullable=False, index=True)
-    score = Column(INTEGER(11), nullable=False)
-    answer = Column(String(300), nullable=False)
-    time = Column(TIMESTAMP, nullable=False, server_default=text("CURRENT_TIMESTAMP"))
+    id = db.Column(INTEGER(11), primary_key=True)
+    idStudent = db.Column(ForeignKey('Student.id'), nullable=False, index=True)
+    idQuestion = db.Column(ForeignKey('Question.id', ondelete='CASCADE'), nullable=False, index=True)
+    score = db.Column(INTEGER(11), nullable=False)
+    answer = db.Column(String(300), nullable=False)
+    time = db.Column(TIMESTAMP, nullable=False, server_default=text("CURRENT_TIMESTAMP"))
 
-    Question = relationship('Question')
-    Student = relationship('Student')
+    Question = db.relationship('Question')
+    Student = db.relationship('Student')
 
 
-class Segmentation(Base):
+class Segmentation(db.Model):
     __tablename__ = 'Segmentation'
 
-    id = Column(INTEGER(11), primary_key=True)
-    idAnswer = Column(ForeignKey('Answer.id', ondelete='CASCADE'), nullable=False, index=True)
-    rank = Column(INTEGER(11), nullable=False)
-    score = Column(INTEGER(11), nullable=False)
-    data = Column(Text, nullable=False)
-    extra = Column(Text)
+    id = db.Column(INTEGER(11), primary_key=True)
+    idAnswer = db.Column(ForeignKey('Answer.id', ondelete='CASCADE'), nullable=False, index=True)
+    rank = db.Column(INTEGER(11), nullable=False)
+    score = db.Column(INTEGER(11), nullable=False)
+    data = db.Column(Text, nullable=False)
+    extra = db.Column(Text)
 
-    Answer = relationship('Answer')
+    Answer = db.relationship('Answer')
