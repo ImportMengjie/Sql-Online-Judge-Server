@@ -1,14 +1,21 @@
 # coding: utf-8
-from sqlalchemy import  ForeignKey, String, TIMESTAMP, Text, text
+from sqlalchemy import ForeignKey, String, TIMESTAMP, Text, text
 from sqlalchemy.dialects.mysql import INTEGER
 from exts import db
 
 
+class Admin(db.Model):
+    __tablename__ = 'Admin'
+
+    name = db.Column(db.String(30), primary_key=True, unique=True)
+    password = db.Column(db.String(45), nullable=False)
+    session = db.Column(db.String(128), unique=True)
+    extra = db.Column(db.String(500))
 
 class Schema(db.Model):
     __tablename__ = 'Schema'
 
-    id = db.Column(db.INTEGER(11), primary_key=True)
+    id = db.Column(INTEGER(11), primary_key=True, unique=True)
     path = db.Column(db.String(200), nullable=False, unique=True)
 
 

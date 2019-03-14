@@ -1,7 +1,10 @@
-from flask import request
-from flask_restful import Resource, reqparse
+import hashlib
+import os
+
+from flask_restful import Resource, reqparse, abort
+from models import Admin
 from exts import db
-from models import Student
+from common.comm import auth_admin
 
 admin_login_parser = reqparse.RequestParser()
 admin_login_parser.add_argument('username', location='json')
@@ -10,18 +13,25 @@ admin_login_parser.add_argument('password', location='json')
 
 class AdminSession(Resource):
 
-    def get(self):
-        pass
+    @auth_admin
+    def get(self, admin):
+        return {'name': admin.name}, 200
 
     def post(self):
         args = admin_login_parser.parse_args()
-        json = request.get_json()
-        s = Student(id=args['username'], password=args['password'], name='王二狗')
-        # db.insert(s)
-        db.session.add(s)
-        db.session.commit()
-        print(json)
-        return args
+        ret = Admin.query.filter_by(name=args["username"], password=args["password"])
+        if ret is not None and ret.first() is not None:
+            admin = ret.first()
+            admin_session = hashlib.sha1(os.urandom(24)).hexdigest()
+            admin.session = admin_session
+            db.session.commit()
+            return {"session": admin_session}, 201
+        abort(401)
 
-    def delete(self):
-        pass
+    @auth_admin
+    def delete(self, admin):
+        print(admin.password)
+        print(admin.name)
+        admin.session = None
+        db.session.commit()
+        return {}, 200
