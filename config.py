@@ -12,3 +12,15 @@ HTTP_NotFound = 404  # 没找到
 
 # 500
 HTTP_Server_Error = 500  # 服务器内部错误，无法完成请求
+
+errors = {
+    'UserAlreadyExistsError': {
+        'message': "A user with that username already exists.",
+        'status': 409,
+    },
+    'ResourceDoesNotExist': {
+        'message': "A resource with that ID no longer exists.",
+        'status': 410,
+        'extra': "Any extra information you want.",
+    },
+}

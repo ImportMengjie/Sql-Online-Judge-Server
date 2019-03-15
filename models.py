@@ -16,7 +16,9 @@ class Schema(db.Model):
     __tablename__ = 'Schema'
 
     id = db.Column(INTEGER(11), primary_key=True, unique=True)
+    name = db.Column(db.String(45), nullable=False)
     path = db.Column(db.String(200), nullable=False, unique=True)
+    description = db.Column(db.String(1000))
 
 
 class Student(db.Model):
@@ -45,8 +47,10 @@ class Table(db.Model):
     __tablename__ = 'Table'
 
     id = db.Column(INTEGER(11), primary_key=True)
+    name = db.Column(String(45))
     idSchema = db.Column(ForeignKey('Schema.id', ondelete='CASCADE'), nullable=False, index=True)
     sql = db.Column(String(500), nullable=False)
+    description = db.Column(db.String(1000))
 
     Schema = db.relationship('Schema')
 

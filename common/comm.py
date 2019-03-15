@@ -10,10 +10,10 @@ def auth_admin(func):
         session = request.json.get('session')
         if session is None:
             abort(400)
-        ret = Admin.query.filter_by(session=session)
-        if ret is None or ret.first() is None:
+        ret = Admin.query.filter_by(session=session).first()
+        if ret is None:
             abort(401)
-        return func(admin=ret.first(), *args, **kwargs)
+        return func(admin=ret, *args, **kwargs)
 
     return wrapper
 
@@ -24,10 +24,10 @@ def auth_student(func):
         session = request.json.get('session')
         if session is None:
             abort(400)
-        ret = Student.query.filter_by(session=session)
-        if ret is None or ret.first() is None:
+        ret = Student.query.filter_by(session=session).first()
+        if ret is None:
             abort(401)
-        return func(student=ret.first(), *args, **kwargs)
+        return func(student=ret, *args, **kwargs)
 
     return wrapper
 
