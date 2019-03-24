@@ -1,33 +1,50 @@
 from flask import request
 from functools import wraps
-from models import Admin,Student
+from models import Admin, Student
 from flask_restful import abort
 
 
-def auth_admin(func):
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        session = request.json.get('session')
-        if session is None:
-            abort(400)
-        ret = Admin.query.filter_by(session=session).first()
-        if ret is None:
-            abort(401)
-        return func(admin=ret, *args, **kwargs)
+def auth_admin(inject=True):
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            session = None
+            if request.method == 'GET':
+                session = request.headers.get('session')
+            elif request.json is not None:
+                session = request.json.get('session')
+            if session is None:
+                abort(400)
+            ret = Admin.query.filter_by(session=session).first()
+            if ret is None:
+                abort(401)
+            if inject:
+                return func(admin=ret, *args, **kwargs)
+            else:
+                return func(*args, **kwargs)
 
-    return wrapper
+        return wrapper
+    return decorator
 
 
-def auth_student(func):
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        session = request.json.get('session')
-        if session is None:
-            abort(400)
-        ret = Student.query.filter_by(session=session).first()
-        if ret is None:
-            abort(401)
-        return func(student=ret, *args, **kwargs)
+def auth_student(inject=True):
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            session = None
+            if request.method == 'GET':
+                session = request.headers.get('session')
+            elif request.json is not None:
+                session = request.json.get('session')
+            if session is None:
+                abort(400)
+            ret = Student.query.filter_by(session=session).first()
+            if ret is None:
+                abort(401)
+            if inject:
+                return func(student=ret, *args, **kwargs)
+            else:
+                return func(*args,**kwargs)
 
-    return wrapper
-
+        return wrapper
+    return decorator

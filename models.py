@@ -12,6 +12,7 @@ class Admin(db.Model):
     session = db.Column(db.String(128), unique=True)
     extra = db.Column(db.String(500))
 
+
 class Schema(db.Model):
     __tablename__ = 'Schema'
 
