@@ -28,12 +28,12 @@ errors = {
     'sqlalchemy.exc.IntegrityError': {
         'message': "your commit is wrong",
         'status': HTTP_Server_Error,
-        'extra':"IntegrityError"
+        'extra': "IntegrityError"
     },
     'IntegrityError': {
         'message': "your commit is wrong",
         'status': HTTP_Server_Error,
-        'extra':"IntegrityError"
+        'extra': "IntegrityError"
     }
 }
 
@@ -41,5 +41,10 @@ errors = {
 def get_shortage_error_dic(name):
     return {'msg': 'required %s parameter' % (name,)}
 
+
 def get_common_error_dic(msg):
-    return {'msg':msg}
+    return {'msg': msg}
+
+
+def get_except_error(e, state=HTTP_Bad_Request):
+    return {'msg': str(e)}, state

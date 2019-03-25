@@ -7,6 +7,10 @@ from resources.schemas import Schema, SchemaList
 from resources.table import Table, TableList
 from resources.rows import Rows, RowsList
 from resources.students import StudentList, Students
+from resources.question import QuestionList, Questions
+from resources.answer import AnswerList, Answers
+from resources.segmentation import Segmentation, SegmentationList
+
 import config
 
 app = Flask(__name__)
@@ -34,6 +38,15 @@ api.add_resource(TableList, '/schema/<int:idSchema>/table')
 
 api.add_resource(Rows, '/table/<int:idTable>/rows/<int:rows_id>')
 api.add_resource(RowsList, '/table/<int:idTable>/rows')
+
+api.add_resource(Questions, '/question/<int:question_id>')
+api.add_resource(QuestionList, '/question')
+
+api.add_resource(Answers, '/question/<int:idQuestion>/answer/<int:answer_id>')
+api.add_resource(AnswerList, '/question/<int:idQuestion>/answer')
+
+api.add_resource(Segmentation, '/answer/<int:idAnswer>/segment/<int:segmentation_id>')
+api.add_resource(SegmentationList, '/answer/<int:idAnswer>/segment')
 
 if __name__ == '__main__':
     app.run(debug=True)

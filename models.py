@@ -39,7 +39,7 @@ class Question(db.Model):
     title = db.Column(db.String(1000), nullable=False)
     text = db.Column(db.String(5000), nullable=False)
     score = db.Column(INTEGER(11), nullable=False, server_default=db.text("'5'"))
-    result = db.Column(String(10000), nullable=False)
+    result = db.Column(String(10000), nullable=True)
 
     Schema = db.relationship('Schema')
 
