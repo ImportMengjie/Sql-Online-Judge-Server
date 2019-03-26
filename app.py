@@ -10,6 +10,7 @@ from resources.students import StudentList, Students
 from resources.question import QuestionList, Questions
 from resources.answer import AnswerList, Answers
 from resources.segmentation import Segmentation, SegmentationList
+from resources.submit import SubmitList, Submits
 
 import config
 
@@ -42,11 +43,16 @@ api.add_resource(RowsList, '/table/<int:idTable>/rows')
 api.add_resource(Questions, '/question/<int:question_id>')
 api.add_resource(QuestionList, '/question')
 
-api.add_resource(Answers, '/question/<int:idQuestion>/answer/<int:answer_id>')
+api.add_resource(Answers, '/question/<int:idQuestion>/answer/<int:schema1answer_id>')
 api.add_resource(AnswerList, '/question/<int:idQuestion>/answer')
 
 api.add_resource(Segmentation, '/answer/<int:idAnswer>/segment/<int:segmentation_id>')
 api.add_resource(SegmentationList, '/answer/<int:idAnswer>/segment')
+
+api.add_resource(Submits, '/student/<int:idStudent>/submit/<int:submit_id>')
+api.add_resource(SubmitList, '/student/<int:idStudent>/submit', '/question/<int:idQuestion>/submit',
+                 '/question/<int:idQuestion>/student/<int:idStudent>/submit')
+
 
 if __name__ == '__main__':
     app.run(debug=True)

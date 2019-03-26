@@ -1,3 +1,5 @@
+from enum import Enum, unique
+
 HTTP_OK = 200  # 请求成功,并且处理无错误
 HTTP_Created = 201  # 已创建。成功请求并创建了新的资源
 HTTP_Accepted = 202  # 已接受。已经接受请求，但未处理完成
@@ -36,6 +38,14 @@ errors = {
         'extra': "IntegrityError"
     }
 }
+
+
+@unique
+class type_submit(Enum):
+    all_right = 0
+    error_spelling = 1
+    error_result = 2
+    error_syntax = 3
 
 
 def get_shortage_error_dic(name):

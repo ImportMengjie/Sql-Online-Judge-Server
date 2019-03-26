@@ -78,7 +78,7 @@ class AnswerList(Resource):
         try:
             cur.execute(answer.data)
             values = cur.fetchall()
-            result = {'data': values, 'len': len(values)}
+            result = {'data': list(values), 'len': len(values)}
             if question.result is None:
                 question.result = json.dumps(result)
             else:

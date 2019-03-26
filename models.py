@@ -83,12 +83,18 @@ class Submit(db.Model):
     id = db.Column(INTEGER(11), primary_key=True)
     idStudent = db.Column(ForeignKey('Student.id'), nullable=False, index=True)
     idQuestion = db.Column(ForeignKey('Question.id', ondelete='CASCADE'), nullable=False, index=True)
+    idAnswer = db.Column(ForeignKey('Answer.id', ondelete='CASCADE'), nullable=False, index=True)
     score = db.Column(INTEGER(11), nullable=False)
     answer = db.Column(String(300), nullable=False)
+    spelling = db.Column(INTEGER(11), nullable=False)
+    type = db.Column(INTEGER(11), nullable=False)
+    result = db.Column(String(10000), nullable=False)
     time = db.Column(TIMESTAMP, nullable=False, server_default=text("CURRENT_TIMESTAMP"))
+    info = db.Column(String(10000))
 
     Question = db.relationship('Question')
     Student = db.relationship('Student')
+    Answer = db.relationship('Answer')
 
 
 class Segmentation(db.Model):
