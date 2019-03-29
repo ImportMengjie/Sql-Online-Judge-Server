@@ -2,11 +2,11 @@ from flask_restful import Resource, reqparse, abort, fields, marshal_with, marsh
 import models
 from exts import db
 from common.comm import auth_admin
+from common.for_sqlite import recover_schema
 from config import *
 from flask import request
 import sqlite3
-import os
-import json
+
 
 table_fields = {
     'id': fields.Integer,
@@ -58,14 +58,7 @@ class TableList(Resource):
         table.description = request.json.get('description')
         schema = models.Schema.query.get(idSchema)
         if table.name is not None and table.sql is not None and schema is not None:
-            if not os.path.exists(schema.path):
-                conn = sqlite3.connect(schema.path)
-                cur = conn.cursor()
-                tables = models.Table.query.filter_by(idSchema=idSchema)
-                for t in tables:
-                    cur.execute(t.sql)
-                cur.close()
-                conn.close()
+            recover_schema(schema)
 
             conn = sqlite3.connect(schema.path)
             cur = conn.cursor()

@@ -8,6 +8,7 @@ from config import *
 import sqlparse
 import Levenshtein
 import sqlparse.keywords
+from common.for_sqlite import recover_schema
 # import re
 
 from flask_restful import abort
@@ -22,6 +23,8 @@ def evaluation(submit: models.Submit):
     question = submit.Question
     answers = models.Answer.query.filter_by(idQuestion=question.id)
     student = submit.Student
+
+    recover_schema(schema)
 
     path = os.path.join(config.save_db_path, student.id)
     if not os.path.exists(path):
@@ -72,18 +75,21 @@ def evaluation(submit: models.Submit):
 def correct_spelling(stem, answers, schema):
     keywords_schema = schema.keywords.split(' ')
     keywords_schema.append('*')
-    formated_sql = sqlparse.format(stem, keyword_case='upper')
-    correct = [0] * len(formated_sql)
-    # segment_sql = re.split('[. \t\n]', formated_sql)
+    format_sql = sqlparse.format(stem, keyword_case='upper')
+    correct = [0] * len(format_sql)
+    format_sql += '\0'
+    # segment_sql = re.split('[. \t\n]', format_sql)
     correct_sql = ''
     start_word_idx = 0
     count_spelling_err = 0
     keywords = [keywords_schema, list(sqlparse.keywords.KEYWORDS.keys()),
                 list(sqlparse.keywords.KEYWORDS_COMMON.keys())]
-    for i in range(0, len(formated_sql)):
-        if formated_sql[i] == ' ' or formated_sql[i] == '.' or i == len(formated_sql)-1:
-            word = formated_sql[start_word_idx:i if i<len(formated_sql)-1 else i+1]
-            if word not in keywords[0] and word.upper() not in keywords[1] and word.upper() not in keywords[2]:
+    for i in range(0, len(format_sql)):
+        if format_sql[i] in (' ', '.', '\0', '=', '<', '>', '!') or format_sql[i].isdigit():
+            word = format_sql[start_word_idx:i]
+
+            if word.strip() != '' and word not in keywords[0] and word.upper() not in keywords[
+                1] and word.upper() not in keywords[2]:
                 count_spelling_err += 1
                 max_word = ''
                 max_value = 0
@@ -105,12 +111,12 @@ def correct_spelling(stem, answers, schema):
                         break
                 correct_sql += max_word
                 correct = list(
-                    map(lambda idx, x: max_value if start_word_idx<=idx<i else x, range(0, len(correct)), correct))
+                    map(lambda idx, x: max_value if start_word_idx <= idx < i else x, range(0, len(correct)), correct))
             else:
                 correct_sql += word
 
-            if len(formated_sql)-1 > i:
-                correct_sql += formated_sql[i]
+            if format_sql[i] != '\0':
+                correct_sql += format_sql[i]
             start_word_idx = i + 1
         else:
             correct[i] = 1
