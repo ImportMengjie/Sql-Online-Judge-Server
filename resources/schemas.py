@@ -6,11 +6,13 @@ from config import *
 from flask import request
 import os
 import sqlite3
+import json
 
 schema_fields = {
     'id': fields.Integer,
     'name': fields.String,
-    'description': fields.String
+    'description': fields.String,
+    'keywords': fields.String
 }
 
 
@@ -32,7 +34,7 @@ class Schema(Resource):
             os.remove(ret.path)
             db.session.delete(ret)
             db.session.commit()
-            return '', HTTP_OK
+            return {}, HTTP_OK
         else:
             return {}, HTTP_NotFound
 
@@ -50,6 +52,7 @@ class SchemaList(Resource):
         schema = models.Schema()
         schema.name = request.json.get('name')
         schema.description = request.json.get('description')
+        schema.keywords = schema.name
         if schema.name is not None:
             schema.path = os.path.join(save_db_path,schema.name+'.db')
             db.session.add(schema)

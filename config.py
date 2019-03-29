@@ -17,6 +17,8 @@ HTTP_Server_Error = 500  # 服务器内部错误，无法完成请求
 
 save_db_path = 'db'
 
+replace_threshold = 0.6
+
 errors = {
     'UserAlreadyExistsError': {
         'message': "A user with that username already exists.",

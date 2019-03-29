@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="sql_judge@localhost" uuid="96360d1b-8727-4c00-b014-58ff83af4f85">
+    <data-source source="LOCAL" name="sql_online_judge@localhost" uuid="96360d1b-8727-4c00-b014-58ff83af4f85">
       <driver-ref>mysql</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>com.mysql.jdbc.Driver</jdbc-driver>
-      <jdbc-url>jdbc:mysql://localhost:3306/sql_judge</jdbc-url>
+      <jdbc-url>jdbc:mysql://localhost:3306/sql_online_judge</jdbc-url>
       <driver-properties>
         <property name="autoReconnect" value="true" />
         <property name="zeroDateTimeBehavior" value="convertToNull" />

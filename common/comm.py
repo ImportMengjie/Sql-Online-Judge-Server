@@ -45,7 +45,7 @@ def auth_student(inject=True):
             if inject:
                 return func(student=ret, *args, **kwargs)
             else:
-                return func(*args,**kwargs)
+                return func(*args, **kwargs)
 
         return wrapper
 
@@ -70,7 +70,7 @@ def auth_all(inject=True):
             if inject:
                 return func(student=ret_student, admin=ret_admin, *args, **kwargs)
             else:
-                return func(*args,**kwargs)
+                return func(*args, **kwargs)
 
         return wrapper
 

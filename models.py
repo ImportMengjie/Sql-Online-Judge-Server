@@ -19,6 +19,7 @@ class Schema(db.Model):
     id = db.Column(INTEGER(11), primary_key=True, unique=True)
     name = db.Column(db.String(45), nullable=False)
     path = db.Column(db.String(200), nullable=False, unique=True)
+    keywords = db.Column(db.String(10000), nullable=False,)
     description = db.Column(db.String(1000))
 
 
@@ -61,7 +62,7 @@ class Answer(db.Model):
 
     id = db.Column(INTEGER(11), primary_key=True)
     idQuestion = db.Column(ForeignKey('Question.id', ondelete='CASCADE'), nullable=False, index=True)
-    data = db.Column(String(400), nullable=False)
+    sql = db.Column(String(400), nullable=False)
     json = db.Column(String(600))
 
     Question = db.relationship('Question')
@@ -86,6 +87,7 @@ class Submit(db.Model):
     idAnswer = db.Column(ForeignKey('Answer.id', ondelete='CASCADE'), nullable=False, index=True)
     score = db.Column(INTEGER(11), nullable=False)
     answer = db.Column(String(300), nullable=False)
+    correct = db.Column(String(300), nullable=False)
     spelling = db.Column(INTEGER(11), nullable=False)
     type = db.Column(INTEGER(11), nullable=False)
     result = db.Column(String(10000), nullable=False)

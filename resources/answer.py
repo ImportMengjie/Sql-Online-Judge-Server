@@ -61,13 +61,13 @@ class AnswerList(Resource):
         answer = models.Answer()
         answer.idQuestion = idQuestion
         question = models.Question.query.get(answer.idQuestion)
-        answer.data = request.json.get('data')
-        if answer.idQuestion is None or answer.data is None:
+        answer.sql = request.json.get('data')
+        if answer.idQuestion is None or answer.sql is None:
             return get_shortage_error_dic("idQuestion data"), HTTP_Bad_Request
         if question is None:
             return get_common_error_dic("question id is wrong"), HTTP_Bad_Request
         try:
-            parsed = moz_sql_parser.parse(answer.data)
+            parsed = moz_sql_parser.parse(answer.sql)
             answer.json = json.dumps(parsed)
         except Exception as e:
             return get_except_error(e)
@@ -76,7 +76,7 @@ class AnswerList(Resource):
         conn = sqlite3.connect(schema.path)
         cur = conn.cursor()
         try:
-            cur.execute(answer.data)
+            cur.execute(answer.sql)
             values = cur.fetchall()
             result = {'data': list(values), 'len': len(values)}
             if question.result is None:

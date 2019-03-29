@@ -5,6 +5,8 @@ from common.comm import auth_admin
 from config import *
 from flask import request
 import sqlite3
+import os
+import json
 
 table_fields = {
     'id': fields.Integer,
@@ -56,11 +58,33 @@ class TableList(Resource):
         table.description = request.json.get('description')
         schema = models.Schema.query.get(idSchema)
         if table.name is not None and table.sql is not None and schema is not None:
+            if not os.path.exists(schema.path):
+                conn = sqlite3.connect(schema.path)
+                cur = conn.cursor()
+                tables = models.Table.query.filter_by(idSchema=idSchema)
+                for t in tables:
+                    cur.execute(t.sql)
+                cur.close()
+                conn.close()
+
             conn = sqlite3.connect(schema.path)
-            c = conn.cursor()
+            cur = conn.cursor()
             try:
-                c.execute(table.sql)
+                cur.execute(table.sql)
                 conn.commit()
+                cur.close()
+                cur = conn.cursor()
+                cur.execute('PRAGMA table_info({})'.format(table.name))
+                keywords = schema.keywords.split(' ')
+                ret = cur.fetchall()
+                for r in ret:
+                    if r[1] not in keywords:
+                        keywords.append(r[1])
+                if table.name not in keywords:
+                    keywords.append(table.name)
+                schema.keywords = ' '.join(keywords)
+                db.session.commit()
+                cur.close()
             except Exception as e:
                 return get_common_error_dic(str(e)), HTTP_Bad_Request
             finally:

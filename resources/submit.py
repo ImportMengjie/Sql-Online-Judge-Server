@@ -81,8 +81,10 @@ class SubmitList(Resource):
             'info': submit.info,
             'time': submit.time.isoformat(),
             'score': submit.score,
-            'right_answer': submit.Answer.data,
+            'right_answer': submit.Answer.sql,
+            'your_answer': submit.answer,
+            'correct': submit.correct,
             'spelling_count': submit.spelling,
             'result': submit.result,
-            'right_result': submit.Question.result
+            'right_result': submit.Question.result,
         }, HTTP_Created

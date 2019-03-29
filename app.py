@@ -16,7 +16,7 @@ import config
 
 app = Flask(__name__)
 api = Api(app, errors=config.errors)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:123456@localhost/sql_judge'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:123456@localhost/sql_online_judge'
 db.init_app(app)
 
 
