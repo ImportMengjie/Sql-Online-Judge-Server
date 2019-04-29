@@ -7,7 +7,7 @@ from exts import db
 from common.comm import auth_student
 
 student_login_parser = reqparse.RequestParser()
-student_login_parser.add_argument('id', location='json')
+student_login_parser.add_argument('username', location='json')
 student_login_parser.add_argument('password', location='json')
 
 
@@ -19,7 +19,7 @@ class StudentSession(Resource):
 
     def post(self):
         args = student_login_parser.parse_args()
-        ret = Student.query.filter_by(id=args["id"], password=args["password"])
+        ret = Student.query.filter_by(id=args["username"], password=args["password"])
         if ret is not None and ret.first() is not None:
             student = ret.first()
             student_session = hashlib.sha1(os.urandom(24)).hexdigest()

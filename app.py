@@ -1,5 +1,6 @@
 from flask import Flask
 from flask_restful import Api
+import flask_cors
 from exts import db
 from resources.adminSession import AdminSession
 from resources.studentSession import StudentSession
@@ -18,7 +19,7 @@ app = Flask(__name__)
 api = Api(app, errors=config.errors)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:123456@localhost/sql_online_judge'
 db.init_app(app)
-
+flask_cors.CORS(app)
 
 @app.route('/')
 def hello_world():
