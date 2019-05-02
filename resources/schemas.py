@@ -1,7 +1,7 @@
 from flask_restful import Resource, reqparse, abort, fields, marshal_with, marshal
 import models
 from exts import db
-from common.comm import auth_admin
+from common.comm import auth_admin,auth_all
 from config import *
 from flask import request
 import os
@@ -18,8 +18,7 @@ schema_fields = {
 
 class Schema(Resource):
 
-    method_decorators = [auth_admin(False)]
-
+    @auth_all(inject=False)
     @marshal_with(schema_fields)
     def get(self, schema_id):
         ret = models.Schema.query.filter_by(id=schema_id).first()
@@ -28,6 +27,7 @@ class Schema(Resource):
         else:
             return {}, HTTP_NotFound
 
+    @auth_admin(inject=False)
     def delete(self, schema_id):
         ret = models.Schema.query.filter_by(id=schema_id).first()
         if ret is not None:
@@ -41,13 +41,13 @@ class Schema(Resource):
 
 class SchemaList(Resource):
 
-    method_decorators = [auth_admin(inject=False)]
-
+    @auth_all(inject=False)
     def get(self):
         schemas = models.Schema.query.filter_by()
         data = [marshal(schema,schema_fields) for schema in schemas]
         return {'data':data}, HTTP_OK
 
+    @auth_admin(inject=False)
     def post(self):
         schema = models.Schema()
         schema.name = request.json.get('name')

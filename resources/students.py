@@ -7,7 +7,8 @@ from flask import request
 
 student_fields = {
     'id': fields.String,
-    'name': fields.String
+    'name': fields.String,
+    'password': fields.String
 }
 
 

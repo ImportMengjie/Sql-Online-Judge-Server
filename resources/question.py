@@ -5,6 +5,7 @@ from common.comm import auth_admin, auth_all
 from config import *
 from flask import request
 import sqlite3
+from sqlalchemy import func
 
 question_field = {
     'id': fields.Integer,
@@ -74,10 +75,29 @@ class Questions(Resource):
 
 class QuestionList(Resource):
 
-    @auth_all(inject=False)
-    def get(self):
+    @auth_all(inject=True)
+    def get(self, student, admin):
         questions = models.Question.query.filter_by()
         data = [marshal(q, question_field) for q in questions]
+        if student is not None:
+            for d in data:
+                question_id = d['id']
+                submits = models.Submit.query.filter_by(
+                    idQuestion=question_id,
+                    idStudent=student.id, )
+                if submits.first() is None:
+                    d['max_score']={
+                        'id': -1,
+                        'type': 'undone',
+                        'score': -1
+                    }
+                    continue
+                max_submit = max(submits, key=lambda submit: submit.score)
+                d['max_score'] = {
+                    'id': max_submit.id,
+                    'type': str(type_submit(max_submit.type)),
+                    'score': max_submit.score
+                }
         return {'data': data}, HTTP_OK
 
     @auth_admin(inject=False)
