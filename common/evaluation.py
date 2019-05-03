@@ -65,7 +65,7 @@ def evaluation(submit: models.Submit):
         conn.close()
     if type_ != type_submit.error_spelling and type_ != type_submit.all_right:
         submit.score = 0
-        submit.info = ''.join(map(str, correct)) + '\n' + syntax_error_msg
+        submit.info = ' '.join(map(str, correct)) + '\n' + syntax_error_msg
     else:
         pass
     submit.type = type_.value
@@ -111,7 +111,7 @@ def correct_spelling(stem, answers, schema):
                         break
                 correct_sql += max_word
                 correct = list(
-                    map(lambda idx, x: max_value if start_word_idx <= idx < i else x, range(0, len(correct)), correct))
+                    map(lambda idx, x: round(max_value,3) if start_word_idx <= idx < i else x, range(0, len(correct)), correct))
             else:
                 correct_sql += word
 
