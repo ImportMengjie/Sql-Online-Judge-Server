@@ -25,7 +25,7 @@ class AdminSession(Resource):
             admin_session = hashlib.sha1(os.urandom(24)).hexdigest()
             admin.session = admin_session
             db.session.commit()
-            return {"session": admin_session}, 201
+            return {"session": admin_session, "name":admin.name}, 201
         abort(401)
 
     @auth_admin

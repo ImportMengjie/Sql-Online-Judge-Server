@@ -1,12 +1,11 @@
 from flask_restful import Resource, reqparse, abort, fields, marshal_with, marshal
 import models
 from exts import db
-from common.comm import auth_admin
+from common.comm import auth_admin, auth_all
 from common.for_sqlite import recover_schema
 from config import *
 from flask import request
 import sqlite3
-
 
 table_fields = {
     'id': fields.Integer,
@@ -43,13 +42,36 @@ class Table(Resource):
 
 
 class TableList(Resource):
-    method_decorators = [auth_admin(inject=False)]
 
-    def get(self, idSchema):
+    @auth_all(inject=True)
+    def get(self, idSchema, student, admin):
         tables = models.Table.query.filter_by(idSchema=idSchema)
-        data = [marshal(table, table_fields) for table in tables]
-        return {'data': data}, HTTP_OK
+        if admin is not None:
+            data = [marshal(table, table_fields) for table in tables]
+            return {'data': data}, HTTP_OK
+        else:
+            schema = models.Schema.query.get(idSchema)
+            if schema is None:
+                abort(404)
+            recover_schema(schema)
+            ret = {'table_name': [], 'table': {}}
+            conn = sqlite3.connect(schema.path)
+            cur = conn.cursor()
+            try:
+                for table in tables:
+                    ret['table'][table.name] = {'description': table.description}
+                    ret['table_name'].append(table.name)
+                    cur.execute('PRAGMA table_info({})'.format(table.name))
+                    table_col = cur.fetchall()
+                    ret['table'][table.name]['cols'] = table_col
+            except Exception as e:
+                return get_common_error_dic(str(e)), HTTP_Bad_Request
+            finally:
+                cur.close()
+                conn.close()
+            return ret
 
+    @auth_admin(inject=False)
     def post(self, idSchema):
         table = models.Table()
         table.name = request.json.get('name')

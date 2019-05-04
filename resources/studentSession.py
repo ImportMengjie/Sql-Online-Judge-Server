@@ -25,7 +25,7 @@ class StudentSession(Resource):
             student_session = hashlib.sha1(os.urandom(24)).hexdigest()
             student.session= student_session
             db.session.commit()
-            return {"session": student_session}, 201
+            return {"session": student_session, 'name':student.name}, 201
         abort(401)
 
     @auth_student
