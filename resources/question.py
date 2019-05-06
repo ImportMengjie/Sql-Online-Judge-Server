@@ -95,7 +95,7 @@ class QuestionList(Resource):
                 max_submit = max(submits, key=lambda submit: submit.score)
                 d['max_score'] = {
                     'id': max_submit.id,
-                    'type': str(type_submit(max_submit.type)),
+                    'type': str(type_submit(max_submit.type)).split('.')[1],
                     'score': max_submit.score
                 }
         return {'data': data}, HTTP_OK

@@ -15,7 +15,6 @@ rows_fields = {
 
 
 class Rows(Resource):
-
     method_decorators = [auth_admin(False)]
 
     @marshal_with(rows_fields)
@@ -46,13 +45,32 @@ class RowsList(Resource):
     def get(self, idTable):
         rows = models.Insert.query.filter_by(idTable=idTable)
         data = [marshal(row, rows_fields) for row in rows]
-        return {'data': data}, HTTP_OK
+        table = models.Table.query.get(idTable)
+        schema = table.Schema
+        ret = {}
+        if schema is not None:
+            conn = sqlite3.connect(schema.path)
+            c = conn.cursor()
+            try:
+                c.execute('select * from ' + table.name)
+                ret = c.fetchall()
+                print(c.fetchall())
+            except Exception as e:
+                return get_common_error_dic(str(e)), HTTP_Bad_Request
+            finally:
+                conn.close()
 
+        return {'data': data, 'detail': ret}, HTTP_OK
+
+    # TODO need to update answer result
     def post(self, idTable):
         row = models.Insert()
         row.idTable = idTable
         row.sql = request.json.get('sql')
+        data = request.json.get('data')
         table = models.Table.query.get(idTable)
+        if data is not None and row.sql is None:
+            row.sql='INSERT INTO '+table.name+' VALUES'+str(tuple(data))
         schema = table.Schema
         if schema is not None and row.sql is not None:
             conn = sqlite3.connect(schema.path)

@@ -85,7 +85,7 @@ def correct_spelling(stem, answers, schema):
     keywords = [keywords_schema, list(sqlparse.keywords.KEYWORDS.keys()),
                 list(sqlparse.keywords.KEYWORDS_COMMON.keys())]
     for i in range(0, len(format_sql)):
-        if format_sql[i] in (' ', '.', '\0', '=', '<', '>', '!') or format_sql[i].isdigit():
+        if format_sql[i] in (' ', '.', '\0', '=', '<', '>', '!',',') or format_sql[i].isdigit():
             word = format_sql[start_word_idx:i]
 
             if word.strip() != '' and word not in keywords[0] and word.upper() not in keywords[

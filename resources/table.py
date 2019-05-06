@@ -46,29 +46,31 @@ class TableList(Resource):
     @auth_all(inject=True)
     def get(self, idSchema, student, admin):
         tables = models.Table.query.filter_by(idSchema=idSchema)
+        schema = models.Schema.query.get(idSchema)
+        if schema is None:
+            abort(404)
+        recover_schema(schema)
+        ret = {'table_name': [], 'table': {}}
+        conn = sqlite3.connect(schema.path)
+        cur = conn.cursor()
+        try:
+            for table in tables:
+                ret['table'][table.name] = {'description': table.description}
+                ret['table_name'].append(table.name)
+                cur.execute('PRAGMA table_info({})'.format(table.name))
+                table_col = cur.fetchall()
+                ret['table'][table.name]['cols'] = table_col
+        except Exception as e:
+            return get_common_error_dic(str(e)), HTTP_Bad_Request
+        finally:
+            cur.close()
+            conn.close()
+
         if admin is not None:
             data = [marshal(table, table_fields) for table in tables]
-            return {'data': data}, HTTP_OK
+            ret['data']=data
+            return ret, HTTP_OK
         else:
-            schema = models.Schema.query.get(idSchema)
-            if schema is None:
-                abort(404)
-            recover_schema(schema)
-            ret = {'table_name': [], 'table': {}}
-            conn = sqlite3.connect(schema.path)
-            cur = conn.cursor()
-            try:
-                for table in tables:
-                    ret['table'][table.name] = {'description': table.description}
-                    ret['table_name'].append(table.name)
-                    cur.execute('PRAGMA table_info({})'.format(table.name))
-                    table_col = cur.fetchall()
-                    ret['table'][table.name]['cols'] = table_col
-            except Exception as e:
-                return get_common_error_dic(str(e)), HTTP_Bad_Request
-            finally:
-                cur.close()
-                conn.close()
             return ret
 
     @auth_admin(inject=False)
@@ -76,6 +78,9 @@ class TableList(Resource):
         table = models.Table()
         table.name = request.json.get('name')
         table.sql = request.json.get('sql')
+        # TODO parse to extra table name
+        if table.name is None:
+            table.name=table.sql.split(' ')[2].strip('(')
         table.idSchema = idSchema
         table.description = request.json.get('description')
         schema = models.Schema.query.get(idSchema)
