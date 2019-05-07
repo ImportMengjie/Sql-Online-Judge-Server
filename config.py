@@ -55,7 +55,7 @@ def get_shortage_error_dic(name):
 
 
 def get_common_error_dic(msg):
-    return {'msg': msg}
+    return {'msg': msg}, HTTP_Bad_Request
 
 
 def get_except_error(e, state=HTTP_Bad_Request):

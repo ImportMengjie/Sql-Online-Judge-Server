@@ -11,7 +11,7 @@ import sqlite3
 answer_field = {
     'id': fields.Integer,
     'idQuestion': fields.Integer,
-    'data': fields.String,
+    'sql': fields.String,
     'json': fields.String,
 }
 
@@ -61,7 +61,7 @@ class AnswerList(Resource):
         answer = models.Answer()
         answer.idQuestion = idQuestion
         question = models.Question.query.get(answer.idQuestion)
-        answer.sql = request.json.get('data')
+        answer.sql = request.json.get('sql')
         if answer.idQuestion is None or answer.sql is None:
             return get_shortage_error_dic("idQuestion data"), HTTP_Bad_Request
         if question is None:
@@ -79,6 +79,7 @@ class AnswerList(Resource):
             cur.execute(answer.sql)
             values = cur.fetchall()
             result = {'data': list(values), 'len': len(values)}
+            result = json.loads(json.dumps(result))
             if question.result is None:
                 question.result = json.dumps(result)
             else:

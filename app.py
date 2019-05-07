@@ -44,7 +44,7 @@ api.add_resource(RowsList, '/table/<int:idTable>/rows')
 api.add_resource(Questions, '/question/<int:question_id>')
 api.add_resource(QuestionList, '/question')
 
-api.add_resource(Answers, '/question/<int:idQuestion>/answer/<int:schema1answer_id>')
+api.add_resource(Answers, '/question/<int:idQuestion>/answer/<int:answer_id>')
 api.add_resource(AnswerList, '/question/<int:idQuestion>/answer')
 
 api.add_resource(Segmentation, '/answer/<int:idAnswer>/segment/<int:segmentation_id>')
