@@ -7,6 +7,8 @@ from flask import request
 import moz_sql_parser
 import json
 import sqlite3
+import sqlparse
+from common.for_sqlite import gen_answer_sql_result
 
 answer_field = {
     'id': fields.Integer,
@@ -67,29 +69,24 @@ class AnswerList(Resource):
         if question is None:
             return get_common_error_dic("question id is wrong"), HTTP_Bad_Request
         try:
+            answer.sql = ' '.join(sqlparse.format(answer.sql, keyword_case='upper').split())
             parsed = moz_sql_parser.parse(answer.sql)
             answer.json = json.dumps(parsed)
         except Exception as e:
             return get_except_error(e)
         # TODO: gen segmentation, gen result
         schema = models.Schema.query.get(question.idSchema)
-        conn = sqlite3.connect(schema.path)
-        cur = conn.cursor()
         try:
-            cur.execute(answer.sql)
-            values = cur.fetchall()
-            result = {'data': list(values), 'len': len(values)}
-            result = json.loads(json.dumps(result))
+            result = gen_answer_sql_result(schema, answer.sql)
             if question.result is None:
                 question.result = json.dumps(result)
             else:
                 origin = json.loads(question.result)
                 if origin != result:
-                    return get_common_error_dic('result not match origin: %s your commit %s' % (question.result, json.dumps(result)))
+                    return get_common_error_dic(
+                        'result not match origin: %s your commit %s' % (question.result, json.dumps(result)))
         except Exception as e:
             return get_common_error_dic(str(e)), HTTP_Bad_Request
-        finally:
-            conn.close()
         db.session.add(answer)
         db.session.commit()
         return {}, HTTP_Created

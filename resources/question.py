@@ -5,7 +5,6 @@ from common.comm import auth_admin, auth_all
 from config import *
 from flask import request
 import sqlite3
-from sqlalchemy import func
 
 question_field = {
     'id': fields.Integer,

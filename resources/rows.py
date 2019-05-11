@@ -6,6 +6,7 @@ from config import *
 from flask import request
 import os
 import sqlite3
+from common.for_question import update_result
 
 rows_fields = {
     'id': fields.Integer,
@@ -32,8 +33,10 @@ class Rows(Resource):
         if ret is not None:
             if ret.idTable != idTable:
                 return get_common_error_dic('table id not match rows id'), HTTP_Bad_Request
+            schema = ret.Table.Schema
             db.session.delete(ret)
             db.session.commit()
+            update_result(schema)
             return {}, HTTP_OK
         else:
             return {}, HTTP_NotFound
@@ -62,7 +65,7 @@ class RowsList(Resource):
 
         return {'data': data, 'detail': ret}, HTTP_OK
 
-    # TODO need to update answer result
+    # DONE need to update answer result
     def post(self, idTable):
         row = models.Insert()
         row.idTable = idTable
@@ -84,6 +87,7 @@ class RowsList(Resource):
                 conn.close()
             db.session.add(row)
             db.session.commit()
+            update_result(schema)
             return {}, HTTP_Created
         else:
             return get_shortage_error_dic('idTable or sql'), HTTP_Bad_Request

@@ -30,8 +30,21 @@ class Table(Resource):
             return {}, HTTP_NotFound
 
     def delete(self, idSchema, table_id):
-        ret = models.Schema.query.filter_by(id=table_id).first()
+        ret = models.Table.query.filter_by(id=table_id).first()
+
         if ret is not None:
+            # delete table in sqlite
+            recover_schema(ret.Schema)
+            conn = sqlite3.connect(ret.Schema.path)
+            cur = conn.cursor()
+            try:
+                cur.execute('DROP TABLE IF EXISTS {}'.format(ret.name))
+            except Exception as e:
+                return get_common_error_dic(str(e)), HTTP_Server_Error
+            finally:
+                cur.close()
+                conn.close()
+
             if ret.idSchema != idSchema:
                 return get_common_error_dic('schema id not match table id'), HTTP_Bad_Request
             db.session.delete(ret)
@@ -78,9 +91,11 @@ class TableList(Resource):
         table = models.Table()
         table.name = request.json.get('name')
         table.sql = request.json.get('sql')
-        # TODO parse to extra table name
+        # DONE parse to extra table name
         if table.name is None:
-            table.name=table.sql.split(' ')[2].strip('(')
+            name = table.sql.split()[2]
+            table.name=name[:name.index('(') if '(' in name else None]
+
         table.idSchema = idSchema
         table.description = request.json.get('description')
         schema = models.Schema.query.get(idSchema)
