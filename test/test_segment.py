@@ -7,7 +7,7 @@ sql2 = 'select * from student'
 
 sql3 = 'select name,sb from student'
 
-sql4 = 'select * from sc,student where sc.Sno=student.Sno'
+sql4 = 'select * from sc,student where sc.Sno=student.Sno and sc.Cno=sc.Sno'
 
 sql5 = 'SELECT COUNT(DISTINCT student_class) FROM t_student'
 
@@ -45,24 +45,4 @@ print(Segment.split_word(sql4))
 print(Segment.split_word(sql5))
 print(Segment.split_word(sql6))
 
-
-def isaNumberic(string: str):
-    if string.isdecimal():
-        return True
-    try:
-        float(string)
-        return True
-    except:
-        return False
-
-
-def segment_origin_sql(sql: str):
-    segment_span = sql.split()
-    ret = []
-    for span in segment_span:
-        if isaNumberic(span) or span.isalpha():
-            ret.append(span)
-
-
-def handleList(ret: list, key: str, data: list):
-    pass
+print(Segment.count_dict({1:{2:3,4:5}}))
