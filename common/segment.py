@@ -4,7 +4,7 @@ import re
 
 
 class Segment:
-    punctuation = ']!"#$%&\'()*+,\-/:;<=>?@[\\^`{|}~'
+    punctuation = ']!"#$%&\'()+,\-/:;<=>?@[\\^`{|}~'
     pattern_punctuation = re.compile('(<>|>=|<=|!=|==|[' + punctuation + '])')
 
     @staticmethod
@@ -42,6 +42,7 @@ class Segment:
 
     @staticmethod
     def split_word(sql: str):
+        sql = sql.replace('GROUP BY', 'GROUP_BY')
         span = sql.split()
         segment_span = []
         segment_word = []
@@ -60,12 +61,49 @@ class Segment:
         return segment_span, segment_word
 
     def __init__(self, sql: str, format=True):
+        self.segment_index = []
         self.origin_sql = sql
+        self.segment = []
+        self.segment_str = []
         sql = self.origin_sql
         if format:
             sql = sqlparse.format(sql, keyword_case='upper')
         self.format_sql = sql
+        print('format sql: ', self.format_sql)
         self.segment_span, self.segment_word = Segment.split_word(self.format_sql)
+        print('segment span', self.segment_span)
+        print('segment word', self.segment_word)
+        self.moz_data = moz_sql_parser.parse(self.origin_sql)
+        print('moz_data', self.moz_data)
+        Segment.handle_dict(self.segment_index, 0, self.moz_data)
+        print('segment index', self.segment_index)
+        self.gen_segment()
+
+    def gen_segment(self):
+        idx_word_map = {}
+        idx = 0
+        for i, word in enumerate(self.segment_word):
+            if word is not None:
+                idx_word_map[idx] = word
+                idx += 1
+        idx_sql_span = 0
+        print('idx_word_map ', idx_word_map)
+        for segment in self.segment_index:
+            self.segment.append([])
+            for word_idx in segment:
+                while self.segment_word[idx_sql_span] is None:
+                    self.segment[-1].append(self.segment_span[idx_sql_span])
+                    idx_sql_span += 1
+                self.segment[-1].append(idx_word_map[word_idx])
+                idx_sql_span += 1
+            while idx_sql_span < len(self.segment_span) and self.segment_span[idx_sql_span] in [')', '"', "'", '>', '}',
+                                                                                                ']']:
+                self.segment[-1].append(self.segment_span[idx_sql_span])
+                idx_sql_span += 1
+        self.segment_str.extend([' '.join(i) for i in self.segment])
+        print('segment result')
+        for i in self.segment_str:
+            print(i)
 
     @staticmethod
     def handle_list(segment_list: list, current_index: int, data: list):
@@ -88,7 +126,7 @@ class Segment:
     def handle_dict(segment_list: list, current_index, data: dict):
         result_list = []
         for k, v in data.items():
-            if k == 'value':
+            if k in ['value', 'literal']:
                 if type(v) == str:
                     return [current_index], current_index + 1
                 elif type(v) == dict:
@@ -98,7 +136,6 @@ class Segment:
                     raise Exception('value key is not dic or str')
 
             elif type(v) == list:
-                index = len(segment_list)
                 segment = []
                 if k not in ['eq', 'neq', 'gt', 'lt', 'gte', 'lte']:
                     segment = [current_index]
@@ -107,7 +144,7 @@ class Segment:
                     handle_list_ret, current_index = Segment.handle_list(segment_list, current_index, v)
                     if handle_list_ret is not None:
                         segment.extend(handle_list_ret)
-                    result_list.extend([] if len(segment)==0 else segment)
+                    result_list.extend([] if len(segment) == 0 else segment)
                 else:
                     index = len(segment_list)
                     segment_list.append(segment)
@@ -128,7 +165,10 @@ class Segment:
                     segment_list[index].extend(handle_dict_ret)
 
             elif type(v) in [str, int, float]:
-                segment_list.append([current_index, current_index + 1])
+                if k in ['avg', 'count']:
+                    result_list.extend([current_index, current_index + 1])
+                else:
+                    segment_list.append([current_index, current_index + 1])
                 current_index += 2
             else:
                 raise Exception('error type:{} data:{}'.format(type(v), v))
@@ -139,11 +179,13 @@ if __name__ == '__main__':
     sql = 'SELECT COUNT(DISTINCT student_class) FROM t_student'
     sql = 'select name,sb from student'
     sql = 'select * from sc,student where sc.Sno=student.Sno and sc.Cno=sc.Sno'
-    sql = 'SELECT student_class,AVG(student_age) FROM t_student GROUP BY (student_class) HAVING AVG(student_age)>=20'
-    print(Segment.split_word(sql))
-    ret = []
-    data = moz_sql_parser.parse(sql)
-    data = {'having': {'gte': [{'avg': 'student_age'}, 20]}}
-    print(data)
-    Segment.handle_dict(ret, 0, data)
-    print(ret)
+    sql = "select ename,deptno,sal from emp where deptno=(select deptno from dept where loc='NEW YORK')"
+    # sql = 'SELECT student_class,AVG(student_age) FROM t_student GROUP BY (student_class) HAVING AVG(student_age)>=20'
+    # print(Segment.split_word(sql))
+    # ret = []
+    # data = moz_sql_parser.parse(sql)
+    # # data = {'having': {'gte': [{'avg': 'student_age'}, 20]}}
+    # print(data)
+    # Segment.handle_dict(ret, 0, data)
+    # print(ret)
+    s = Segment(sql)
