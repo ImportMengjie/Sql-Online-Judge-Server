@@ -179,7 +179,7 @@ if __name__ == '__main__':
     sql = 'SELECT COUNT(DISTINCT student_class) FROM t_student'
     sql = 'select name,sb from student'
     sql = 'select * from sc,student where sc.Sno=student.Sno and sc.Cno=sc.Sno'
-    sql = "select ename,deptno,sal from emp where deptno=(select deptno from dept where loc='NEW YORK')"
+    sql = "select ename,deptno,sal from emp where deptno=(select deptno from dept where loc='NEWYORK')"
     # sql = 'SELECT student_class,AVG(student_age) FROM t_student GROUP BY (student_class) HAVING AVG(student_age)>=20'
     # print(Segment.split_word(sql))
     # ret = []

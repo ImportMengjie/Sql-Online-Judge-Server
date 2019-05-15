@@ -9,6 +9,7 @@ import json
 import sqlite3
 import sqlparse
 from common.for_sqlite import gen_answer_sql_result
+from common.segment import Segment
 
 answer_field = {
     'id': fields.Integer,
@@ -33,8 +34,13 @@ class Answers(Resource):
     def delete(self, idQuestion, answer_id):
         ret = models.Answer.query.filter_by(id=answer_id).first()
         if ret is not None:
+            question = ret.Question
             db.session.delete(ret)
             db.session.commit()
+            answer_left = models.Answer.query.filter_by(idQuestion=question.id).first()
+            if answer_left is None:
+                question.result = None
+                db.session.commit()
             return {}, HTTP_OK
         else:
             return {}, HTTP_NotFound
@@ -87,6 +93,18 @@ class AnswerList(Resource):
                         'result not match origin: %s your commit %s' % (question.result, json.dumps(result)))
         except Exception as e:
             return get_common_error_dic(str(e)), HTTP_Bad_Request
+
         db.session.add(answer)
+        db.session.commit()
+
+        segment = Segment(answer.sql)
+        segment_score = question.score//len(segment.segment_str)
+        for idx,segment_str in enumerate(segment.segment_str):
+            db_segment = models.Segmentation()
+            db_segment.score = segment_score
+            db_segment.data = segment_str
+            db_segment.idAnswer = answer.id
+            db_segment.rank = idx
+            db.session.add(db_segment)
         db.session.commit()
         return {}, HTTP_Created

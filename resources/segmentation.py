@@ -32,8 +32,10 @@ class Segmentation(Resource):
         if ret is not None:
             score = request.json.get('score')
             extra = request.json.get('extra')
+            data = request.json.get('data')
             ret.score = ret.score if score is None else score
             ret.extra = ret.extra if extra is None else extra
+            ret.data = ret.data if data is None else data
             db.session.commit()
         else:
             return {}, HTTP_NotFound
@@ -43,7 +45,7 @@ class SegmentationList(Resource):
 
     @auth_all(inject=False)
     def get(self, idAnswer):
-        segmentations = models.Segmentation.query.filter_by(idAnswer=idAnswer)
-        data = [marshal(s, segmentation_field) for s in segmentations]
+        segments = models.Segmentation.query.filter_by(idAnswer=idAnswer).order_by(models.Segmentation.rank)
+        data = [marshal(s, segmentation_field) for s in segments]
         return {'data': data}, HTTP_OK
 
