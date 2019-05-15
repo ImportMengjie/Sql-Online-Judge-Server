@@ -9,6 +9,7 @@ import sqlparse
 import Levenshtein
 import sqlparse.keywords
 from common.for_sqlite import recover_schema
+from common.segment import Segment
 # import re
 
 from flask_restful import abort
@@ -63,11 +64,54 @@ def evaluation(submit: models.Submit):
     finally:
         cur.close()
         conn.close()
+
+    submit.segmentJson = json.dumps({'compare': []})
     if type_ != type_submit.error_spelling and type_ != type_submit.all_right:
-        submit.score = 0
         submit.info = ' '.join(map(str, correct)) + '\n' + syntax_error_msg
-    else:
-        pass
+        if type_ == type_submit.error_result:
+            submit.score = question.score
+            stu_segments = Segment(submit.correct)
+            segments = models.Segmentation.query.filter_by(idAnswer=submit.Answer.id).order_by(models.Segmentation.rank)
+            segments = [s for s in segments]
+            submit.segmentJson = {'compare': []}
+            idx_student_segment = 0
+            idx_segment = 0
+            while idx_segment < len(segments):
+                compare = {'right_segment': segments[idx_segment].data}
+                if segments[idx_segment].data == stu_segments.segment_str[idx_student_segment]:
+                    compare['student_segment'] = stu_segments.segment_str[idx_student_segment]
+                    compare['deduction'] = 0
+                    idx_student_segment += 1
+                else:
+                    tmp_idx = idx_student_segment
+                    max_score = 0
+                    max_idx = tmp_idx
+                    while tmp_idx < len(stu_segments.segment_str):
+                        score = Levenshtein.ratio(segments[idx_segment].data, stu_segments.segment_str[tmp_idx])
+                        if score > max_score:
+                            max_idx = tmp_idx
+                            max_score = score
+                        tmp_idx+=1
+                    if max_score < 0.6:
+                        compare['student_segment'] = ''
+                        compare['deduction'] = segments[idx_segment].score
+                        submit.score -= segments[idx_segment].score
+                    else:
+                        compare['student_segment'] = stu_segments.segment_str[max_idx]
+                        idx_student_segment = max_idx
+                        if max_score == 1:
+                            compare['deduction'] = 0
+                        else:
+                            compare['deduction'] = segments[idx_segment].score
+                            submit.score -= segments[idx_segment].score
+
+                idx_segment += 1
+                submit.segmentJson['compare'].append(compare)
+
+        elif type_ == type_submit.error_syntax:
+            submit.score = 0
+            pass
+    submit.segmentJson = json.dumps(submit.segmentJson)
     submit.type = type_.value
     os.remove(path)
 
@@ -85,7 +129,7 @@ def correct_spelling(stem, answers, schema):
     keywords = [keywords_schema, list(sqlparse.keywords.KEYWORDS.keys()),
                 list(sqlparse.keywords.KEYWORDS_COMMON.keys())]
     for i in range(0, len(format_sql)):
-        if format_sql[i] in (' ', '.', '\0', '=', '<', '>', '!',',') or format_sql[i].isdigit():
+        if format_sql[i] in (' ', '.', '\0', '=', '<', '>', '!', ',') or format_sql[i].isdigit():
             word = format_sql[start_word_idx:i]
 
             if word.strip() != '' and word not in keywords[0] and word.upper() not in keywords[
@@ -111,7 +155,8 @@ def correct_spelling(stem, answers, schema):
                         break
                 correct_sql += max_word
                 correct = list(
-                    map(lambda idx, x: round(max_value,3) if start_word_idx <= idx < i else x, range(0, len(correct)), correct))
+                    map(lambda idx, x: round(max_value, 3) if start_word_idx <= idx < i else x, range(0, len(correct)),
+                        correct))
             else:
                 correct_sql += word
 

@@ -5,6 +5,7 @@ from common.comm import auth_admin, auth_all, auth_student
 from config import *
 from flask import request
 import common.evaluation
+import json
 
 
 submit_field = {
@@ -87,4 +88,5 @@ class SubmitList(Resource):
             'spelling_count': submit.spelling,
             'result': submit.result,
             'right_result': submit.Question.result,
+            'segment_json': json.loads(submit.segmentJson)
         }, HTTP_Created
