@@ -10,6 +10,7 @@ import sqlite3
 import sqlparse
 from common.for_sqlite import gen_answer_sql_result
 from common.segment import Segment
+import math
 
 answer_field = {
     'id': fields.Integer,
@@ -98,7 +99,7 @@ class AnswerList(Resource):
         db.session.commit()
 
         segment = Segment(answer.sql)
-        segment_score = question.score//len(segment.segment_str)
+        segment_score = math.ceil(question.score/len(segment.segment_str))
         for idx,segment_str in enumerate(segment.segment_str):
             db_segment = models.Segmentation()
             db_segment.score = segment_score

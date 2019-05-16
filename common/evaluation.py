@@ -91,13 +91,20 @@ def evaluation(submit: models.Submit):
                         if score > max_score:
                             max_idx = tmp_idx
                             max_score = score
-                        tmp_idx+=1
+                        tmp_idx += 1
                     if max_score < 0.6:
                         compare['student_segment'] = ''
                         compare['deduction'] = segments[idx_segment].score
                         submit.score -= segments[idx_segment].score
                     else:
                         compare['student_segment'] = stu_segments.segment_str[max_idx]
+                        while idx_student_segment < max_idx - 1:
+                            submit.segmentJson['compare'].append({
+                                'student_segment': stu_segments.segment_str[idx_student_segment],
+                                'right_segment': '',
+                                'deduction': 0
+                            })
+                            idx_student_segment += 1
                         idx_student_segment = max_idx
                         if max_score == 1:
                             compare['deduction'] = 0
@@ -107,10 +114,20 @@ def evaluation(submit: models.Submit):
 
                 idx_segment += 1
                 submit.segmentJson['compare'].append(compare)
+            idx_student_segment += 1
+            while idx_student_segment < len(stu_segments.segment_str):
+                submit.segmentJson['compare'].append({
+                    'student_segment': stu_segments.segment_str[idx_student_segment],
+                    'right_segment': '',
+                    'deduction': 2
+                })
+                submit.score -= 2
+                idx_student_segment += 1
 
         elif type_ == type_submit.error_syntax:
             submit.score = 0
             pass
+    submit.score = 0 if submit.score < 0 else submit.score
     submit.segmentJson = json.dumps(submit.segmentJson)
     submit.type = type_.value
     os.remove(path)
