@@ -51,7 +51,7 @@ api.add_resource(Segmentation, '/answer/<int:idAnswer>/segment/<int:segmentation
 api.add_resource(SegmentationList, '/answer/<int:idAnswer>/segment')
 
 api.add_resource(Submits, '/student/<int:idStudent>/submit/<int:submit_id>')
-api.add_resource(SubmitList, '/student/<int:idStudent>/submit', '/question/<int:idQuestion>/submit',
+api.add_resource(SubmitList, '/submit', '/question/<int:idQuestion>/submit',
                  '/question/<int:idQuestion>/student/<int:idStudent>/submit')
 
 
