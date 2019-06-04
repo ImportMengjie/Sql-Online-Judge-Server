@@ -77,7 +77,10 @@ class QuestionList(Resource):
     @auth_all(inject=True)
     def get(self, student, admin):
         questions = models.Question.query.filter_by()
-        data = [marshal(q, question_field) for q in questions]
+        data = []
+        for q in questions:
+            if student is None or models.Answer.query.filter_by(idQuestion=q.id).first() is not None:
+                data.append(marshal(q,question_field))
         if student is not None:
             for d in data:
                 question_id = d['id']

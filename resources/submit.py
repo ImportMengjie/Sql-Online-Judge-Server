@@ -90,6 +90,7 @@ class SubmitList(Resource):
             return get_common_error_dic('question id is wrong'), HTTP_Bad_Request
         if submit.answer is None:
             return get_shortage_error_dic('answer'), HTTP_Bad_Request
+        submit.answer = submit.answer.strip()
         common.evaluation.evaluation(submit)
         db.session.add(submit)
         db.session.commit()

@@ -5,7 +5,7 @@ import re
 
 class Segment:
     punctuation = ']!"#$%&\'()+,\-/:;<=>?@[\\^`{|}~'
-    pattern_punctuation = re.compile('(<>|>=|<=|!=|==|[' + punctuation + '])')
+    pattern_punctuation = re.compile(r'(<>|>=|<=|!=|==|[' + punctuation + '])')
 
     @staticmethod
     def is_number(word: str):
@@ -19,7 +19,7 @@ class Segment:
 
     @staticmethod
     def is_word(word: str):
-        if Segment.is_number(word) or word.strip('_').isalpha() or word.count('.') == 1:
+        if Segment.is_number(word) or word.strip('_').isalpha():
             return True
         else:
             return False
@@ -43,6 +43,7 @@ class Segment:
     @staticmethod
     def split_word(sql: str):
         sql = sql.replace('GROUP BY', 'GROUP_BY')
+        sql = sql.replace('ORDER BY', 'ORDER_BY')
         span = sql.split()
         segment_span = []
         segment_word = []
@@ -180,7 +181,7 @@ if __name__ == '__main__':
     sql = 'select name,sb from student'
     sql = 'select * from sc,student where sc.Sno=student.Sno and sc.Cno=sc.Sno'
     sql = "select ename,deptno,sal from emp where deptno=(select deptno from dept where loc='NEWYORK')"
-    # sql = 'SELECT student_class,AVG(student_age) FROM t_student GROUP BY (student_class) HAVING AVG(student_age)>=20'
+    sql = 'SELECT student_class,AVG(student_age) FROM t_student GROUP BY (student_class) HAVING AVG(student_age)>=20'
     # print(Segment.split_word(sql))
     # ret = []
     # data = moz_sql_parser.parse(sql)
@@ -188,4 +189,8 @@ if __name__ == '__main__':
     # print(data)
     # Segment.handle_dict(ret, 0, data)
     # print(ret)
+    sql = 'select * from sc where sc.Sno=1'
     s = Segment(sql)
+    import json
+    print(json.dumps({'select': [{'value': 'student_class'}, {'value': {'avg': 'student_age'}}], 'from': 't_student',
+                'groupby': {'value': 'student_class'}, 'having': {'gte': [{'avg': 'student_age'}, 20]}}, indent=4))

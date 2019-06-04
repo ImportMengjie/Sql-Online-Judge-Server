@@ -69,7 +69,7 @@ def evaluation(submit: models.Submit):
     if type_ != type_submit.error_spelling and type_ != type_submit.all_right:
         submit.info = ' '.join(map(str, correct)) + '\n' + syntax_error_msg
         if type_ == type_submit.error_result:
-            submit.score = question.score
+            submit.score = question.score - count_spelling_err
             stu_segments = Segment(submit.correct)
             segments = models.Segmentation.query.filter_by(idAnswer=submit.Answer.id).order_by(models.Segmentation.rank)
             segments = [s for s in segments]
@@ -98,14 +98,15 @@ def evaluation(submit: models.Submit):
                         submit.score -= segments[idx_segment].score
                     else:
                         compare['student_segment'] = stu_segments.segment_str[max_idx]
-                        while idx_student_segment < max_idx - 1:
+                        while idx_student_segment < max_idx:
                             submit.segmentJson['compare'].append({
                                 'student_segment': stu_segments.segment_str[idx_student_segment],
                                 'right_segment': '',
-                                'deduction': 0
+                                'deduction': 2
                             })
+                            submit.score -= 2
                             idx_student_segment += 1
-                        idx_student_segment = max_idx
+                        idx_student_segment = max_idx + 1
                         if max_score == 1:
                             compare['deduction'] = 0
                         else:
@@ -114,7 +115,6 @@ def evaluation(submit: models.Submit):
 
                 idx_segment += 1
                 submit.segmentJson['compare'].append(compare)
-            idx_student_segment += 1
             while idx_student_segment < len(stu_segments.segment_str):
                 submit.segmentJson['compare'].append({
                     'student_segment': stu_segments.segment_str[idx_student_segment],
@@ -146,7 +146,7 @@ def correct_spelling(stem, answers, schema):
     keywords = [keywords_schema, list(sqlparse.keywords.KEYWORDS.keys()),
                 list(sqlparse.keywords.KEYWORDS_COMMON.keys())]
     for i in range(0, len(format_sql)):
-        if format_sql[i] in (' ', '.', '\0', '=', '<', '>', '!', ',') or format_sql[i].isdigit():
+        if format_sql[i] in (' ', '.', '\0', '=', '<', '>', '!', ',', ')', '(') or format_sql[i].isdigit():
             word = format_sql[start_word_idx:i]
 
             if word.strip() != '' and word not in keywords[0] and word.upper() not in keywords[
