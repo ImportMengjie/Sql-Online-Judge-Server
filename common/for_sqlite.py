@@ -34,3 +34,14 @@ def gen_answer_sql_result(schema: models.Schema, sql: str):
         cur.close()
         conn.close()
     return json.loads(json.dumps(result))
+
+
+def judge_schema_table_rows_empty(idSchema):
+    tables = list(models.Table.query.filter_by(idSchema=idSchema))
+    if len(tables) == 0:
+        return True
+    for t in tables:
+        rows = models.Insert.query.filter_by(idTable=t.id)
+        if rows.first() is None:
+            return True
+    return False

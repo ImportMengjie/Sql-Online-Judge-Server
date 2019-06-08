@@ -8,6 +8,13 @@ class Segment:
     pattern_punctuation = re.compile(r'(<>|>=|<=|!=|==|[' + punctuation + '])')
 
     @staticmethod
+    def filter_segment_punctuation(segment_str: str) -> str:
+        ret = segment_str.replace(')', '')
+        ret = ret.replace('(', '')
+        ret = ret.strip()
+        return ret
+
+    @staticmethod
     def is_number(word: str):
         if word.isdecimal():
             return True
@@ -190,7 +197,10 @@ if __name__ == '__main__':
     # Segment.handle_dict(ret, 0, data)
     # print(ret)
     sql = 'select * from sc where sc.Sno=1'
+    sql = 'select * from sc join student on sc.Sno in (select Sno from student) '
     s = Segment(sql)
     import json
+
     print(json.dumps({'select': [{'value': 'student_class'}, {'value': {'avg': 'student_age'}}], 'from': 't_student',
-                'groupby': {'value': 'student_class'}, 'having': {'gte': [{'avg': 'student_age'}, 20]}}, indent=4))
+                      'groupby': {'value': 'student_class'}, 'having': {'gte': [{'avg': 'student_age'}, 20]}},
+                     indent=4))

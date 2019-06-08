@@ -8,7 +8,7 @@ import moz_sql_parser
 import json
 import sqlite3
 import sqlparse
-from common.for_sqlite import gen_answer_sql_result
+from common.for_sqlite import gen_answer_sql_result, judge_schema_table_rows_empty
 from common.segment import Segment
 import math
 
@@ -75,6 +75,8 @@ class AnswerList(Resource):
             return get_shortage_error_dic("idQuestion data"), HTTP_Bad_Request
         if question is None:
             return get_common_error_dic("question id is wrong"), HTTP_Bad_Request
+        if judge_schema_table_rows_empty(question.idSchema):
+            return get_common_error_dic('schema table is empty!')
         try:
             answer.sql = ' '.join(sqlparse.format(answer.sql, keyword_case='upper').split())
             parsed = moz_sql_parser.parse(answer.sql)

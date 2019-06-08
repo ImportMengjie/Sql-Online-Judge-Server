@@ -78,7 +78,8 @@ def evaluation(submit: models.Submit):
             idx_segment = 0
             while idx_segment < len(segments):
                 compare = {'right_segment': segments[idx_segment].data}
-                if segments[idx_segment].data == stu_segments.segment_str[idx_student_segment]:
+                if Segment.filter_segment_punctuation(segments[idx_segment].data) == Segment.filter_segment_punctuation(
+                        stu_segments.segment_str[idx_student_segment]):
                     compare['student_segment'] = stu_segments.segment_str[idx_student_segment]
                     compare['deduction'] = 0
                     idx_student_segment += 1
@@ -87,7 +88,8 @@ def evaluation(submit: models.Submit):
                     max_score = 0
                     max_idx = tmp_idx
                     while tmp_idx < len(stu_segments.segment_str):
-                        score = Levenshtein.ratio(segments[idx_segment].data, stu_segments.segment_str[tmp_idx])
+                        score = Levenshtein.ratio(Segment.filter_segment_punctuation(segments[idx_segment].data),
+                                                  Segment.filter_segment_punctuation(stu_segments.segment_str[tmp_idx]))
                         if score > max_score:
                             max_idx = tmp_idx
                             max_score = score

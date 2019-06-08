@@ -2,6 +2,7 @@ from flask_restful import Resource, fields, marshal_with, marshal
 import models
 from exts import db
 from common.comm import auth_admin, auth_all
+from common.for_sqlite import judge_schema_table_rows_empty
 from config import *
 from flask import request
 import sqlite3
@@ -79,8 +80,10 @@ class QuestionList(Resource):
         questions = models.Question.query.filter_by()
         data = []
         for q in questions:
-            if student is None or models.Answer.query.filter_by(idQuestion=q.id).first() is not None:
-                data.append(marshal(q,question_field))
+            if student is None or not (
+                    models.Answer.query.filter_by(idQuestion=q.id).first() is None or judge_schema_table_rows_empty(
+                    q.idSchema)):
+                data.append(marshal(q, question_field))
         if student is not None:
             for d in data:
                 question_id = d['id']
@@ -88,7 +91,7 @@ class QuestionList(Resource):
                     idQuestion=question_id,
                     idStudent=student.id, )
                 if submits.first() is None:
-                    d['max_score']={
+                    d['max_score'] = {
                         'id': -1,
                         'type': 'undone',
                         'score': -1
