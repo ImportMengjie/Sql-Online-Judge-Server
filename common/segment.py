@@ -197,7 +197,7 @@ if __name__ == '__main__':
     # Segment.handle_dict(ret, 0, data)
     # print(ret)
     sql = 'select * from sc where sc.Sno=1'
-    sql = 'select * from sc join student on sc.Sno in (select Sno from student) '
+    # sql = 'select * from sc join student on sc.Sno in (select Sno from student) '
     s = Segment(sql)
     import json
 
