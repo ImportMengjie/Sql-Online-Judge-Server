@@ -94,22 +94,25 @@ class SubmitList(Resource):
         common.evaluation.evaluation(submit)
         db.session.add(submit)
         db.session.commit()
-        right_result = json.loads(submit.Question.result)['data']
-        result = json.loads(submit.result)['data']
-        compare_result = []
-        idx_right_result = 0
-        idx_result = 0
-        while idx_result < len(result) and idx_right_result < len(right_result):
-            compare_result.append(
-                {'your_result': str(result[idx_result]), 'right_result': str(right_result[idx_right_result])})
-            idx_result += 1
-            idx_right_result += 1
-        while idx_result < len(result):
-            compare_result.append({'your_result': str(result[idx_result]), 'right_result': ''})
-            idx_result += 1
-        while idx_right_result < len(right_result):
-            compare_result.append({'your_result': '', 'right_result': str(right_result[idx_right_result])})
-            idx_right_result += 1
+        if submit.type != type_submit.error_syntax.value:
+            right_result = json.loads(submit.Question.result)['data']
+            result = json.loads(submit.result)['data']
+            compare_result = []
+            idx_right_result = 0
+            idx_result = 0
+            while idx_result < len(result) and idx_right_result < len(right_result):
+                compare_result.append(
+                    {'your_result': str(result[idx_result]), 'right_result': str(right_result[idx_right_result])})
+                idx_result += 1
+                idx_right_result += 1
+            while idx_result < len(result):
+                compare_result.append({'your_result': str(result[idx_result]), 'right_result': ''})
+                idx_result += 1
+            while idx_right_result < len(right_result):
+                compare_result.append({'your_result': '', 'right_result': str(right_result[idx_right_result])})
+                idx_right_result += 1
+        else:
+            compare_result = []
         return {
                    'id': submit.id,
                    'type': submit.type,
@@ -121,8 +124,8 @@ class SubmitList(Resource):
                    'your_answer': submit.answer,
                    'correct': submit.correct,
                    'spelling_count': submit.spelling,
-                   'result': json.loads(submit.result)['data'],
-                   'right_result': json.loads(submit.Question.result)['data'],
+                   'result': submit.result,
+                   'right_result': submit.Question.result,
                    'segment_json': json.loads(submit.segmentJson),
                    'compare_result': compare_result
                }, HTTP_Created

@@ -148,7 +148,7 @@ class Segment:
                 if k not in ['eq', 'neq', 'gt', 'lt', 'gte', 'lte']:
                     segment = [current_index]
                     current_index += 1
-                if k in ['and', 'or', 'eq', 'neq', 'lt', 'gte', 'lte']:
+                if k in ['and', 'or', 'eq', 'neq', 'lt', 'gte', 'lte', 'gt']:
                     handle_list_ret, current_index = Segment.handle_list(segment_list, current_index, v)
                     if handle_list_ret is not None:
                         segment.extend(handle_list_ret)
@@ -198,6 +198,7 @@ if __name__ == '__main__':
     # print(ret)
     sql = 'select * from sc where sc.Sno=1'
     # sql = 'select * from sc join student on sc.Sno in (select Sno from student) '
+    sql = ' SELECT * FROM sc, student WHERE sc.Sno=student.Sno AND sc.Grade >60'
     s = Segment(sql)
     import json
 

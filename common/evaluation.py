@@ -78,7 +78,8 @@ def evaluation(submit: models.Submit):
             idx_segment = 0
             while idx_segment < len(segments):
                 compare = {'right_segment': segments[idx_segment].data}
-                if Segment.filter_segment_punctuation(segments[idx_segment].data) == Segment.filter_segment_punctuation(
+                if idx_student_segment < len(stu_segments.segment_str) and Segment.filter_segment_punctuation(
+                        segments[idx_segment].data) == Segment.filter_segment_punctuation(
                         stu_segments.segment_str[idx_student_segment]):
                     compare['student_segment'] = stu_segments.segment_str[idx_student_segment]
                     compare['deduction'] = 0
